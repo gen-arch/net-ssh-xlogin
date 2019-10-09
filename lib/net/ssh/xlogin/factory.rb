@@ -9,7 +9,7 @@ module Net::SSH::Xlogin
 
     def create(yaml)
       yaml.each do |name, info|
-        name = name.to_sym
+        name = name
         info = info.reduce({}){|h, (k, v)| h = h.merge(k.to_sym => v)}
         set name, info
       end
