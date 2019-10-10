@@ -5,14 +5,15 @@ module Net::SSH::Xlogin
 
     DEFAULT_TIMEOUT  = 10
     DEFAULT_PROMPT   = /[$%#>] ?\z/n
-    RESERVED_METHODS = %i( login logout enable disable delegate )
 
     attr_reader :methods
     attr_reader :prompts
+    attr_reader :timeout
 
     def initialize(name)
       @name    = name
       @prompts = Array.new
+      @timeout = DEFAULT_TIMEOUT
       @methods = Hash.new
     end
 
@@ -23,7 +24,7 @@ module Net::SSH::Xlogin
     end
 
     def prompt_patten
-      Regexp.union(@prompts.map(&:first))
+      Regexp.union(prompt.map(&:first))
     end
 
     def bind(name, &block)
@@ -37,11 +38,5 @@ module Net::SSH::Xlogin
       end
       klass.new(self, name, **opts)
     end
-
-    def method_missing(name, *, &block)
-      super unless RESERVED_METHODS.include?(name)
-      bind(name) { |*args| instance_exec(*args, &block) }
-    end
-
   end
 end

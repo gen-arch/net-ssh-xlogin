@@ -4,50 +4,47 @@ require 'net/ssh/xlogin/factory'
 
 module Net::SSH::Xlogin
   class Connection < Net::SSH::Telnet
-    ESCAPE_CHARACTER = [/\e\]\d{1,3};/,/\e\[\d{1,3}[mK]/,/\e\[\d{1,3};\d{1,3}[mK]/, /\e\]\d{1,3};/]
 
     attr_reader :name
+
     def initialize(template, name, **opts)
       @name     = name
-      @config   = opts
+      @options  = opts
 
-      log       = @config[:log] || @config[:output_log]
-      info      = @config[:uri]
-      max_retry = @config[:max_retry] || 1
-      @host     = info.host
-      @user     = info.user
-      @pass     = info.password
+      log       = @options[:log] || @options[:output_log]
+      max_retry = @options[:max_retry] || 1
+
+      @options[:timeout]   ||= template.timeout
+      @options[:host_name] ||= name
 
       begin
         args = Hash.new
         args["Output_log"]  = log if log
-        args["Dump_log"]    = @config[:dump_log]   if @config[:dump_log]
-        args["Prompt"]      = @config[:prompt]     || template.prompt_patten
-        args["Timeout"]     = @config[:timeout]    || 10
-        args["Waittime"]    = @config[:waittime]   || 0
-        args["Terminator"]  = @config[:terminator] || LF
-        args["Binmode"]     = @config[:binmode]    || false
-        args["PTYOptions"]  = @config[:ptyoptions] || {}
+        args["Dump_log"]    = @options[:dump_log]   if @options[:dump_log]
+        args["Prompt"]      = @options[:prompt]     || template.prompt_patten
+        args["Timeout"]     = @options[:timeout]    || 10
+        args["Waittime"]    = @options[:waittime]   || 0
+        args["Terminator"]  = @options[:terminator] || LF
+        args["Binmode"]     = @options[:binmode]    || false
+        args["PTYOptions"]  = @options[:ptyoptions] || {}
 
-        if @config[:proxy]
-          args["Proxy"]     = @config[:proxy]
+        if @options[:proxy]
+          args["Host"]      = @options[:host_name]
+          args["Port"]      = @options[:port]
+          args["Username"]  = @options[:user]
+          args["Password"]  = @options[:password]
+          args["Proxy"]     = @options[:proxy]
         else
-          ssh_options       = @config.slice(*Net::SSH::VALID_OPTIONS)
+          ssh_options       = @options.slice(*Net::SSH::VALID_OPTIONS)
+          ssh_options       = @options[:host] unless @options[:host_name]
           args['Session']   = Net::SSH.start(nil, nil, ssh_options)
         end
-
 
         super(args)
       rescue => e
         retry if (max_retry -= 1) > 0
         raise e
       end
-    end
-
-    def cmd(*args)
-      res = super
-      res.gsub(/[[:cntrl:]]/, '') if @config[:escape] == true
-      res
     end
   end
 end

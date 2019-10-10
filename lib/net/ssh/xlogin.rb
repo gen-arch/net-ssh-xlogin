@@ -8,15 +8,14 @@ module Net::SSH::Xlogin
   class Error < StandardError; end
   class << self
     def get(name, **opts)
-      info  = factory.inventory[name]
-      opts  = opts.merge(info)
+      opts  = factory.inventory[name].merge(opts)
       type  = opts[:type]
       klass = factory.templates[type]
       klass.build(name, **opts)
     end
 
-    def configure(&bk)
-      instance_eval(&bk)
+    def configure(&block)
+      instance_eval(&block)
     end
 
     def source(*args)
@@ -37,13 +36,21 @@ module Net::SSH::Xlogin
       end
     end
 
-    def template(*templates, **opts)
-      templates = templates.map{|path| Dir.exist?(path) ? Dir.glob(File.join(path, '*.rb')) : path }.flatten
+    def template(*templates, **opts, &block)
+      name = opts[:type]
 
+      if block
+        template = factory.templates[name] || Template.new(name)
+        template.instance_eval(&block)
+        factory.templates[name] = template
+        return
+      end
+
+      templates = templates.map{|path| Dir.exist?(path) ? Dir.glob(File.join(path, '*.rb')) : path }.flatten
       templates.each do |path|
-        name       = File.basename(path, '.rb').scan(/\w+/).join('_').to_sym
-        template   = factory.templates[name] || Template.new(name)
+        name     ||= File.basename(path, '.rb').scan(/\w+/).join('_').to_sym
         text       = IO.read(path)
+        template   = factory.templates[name] || Template.new(name)
         template.instance_eval(text)
 
         factory.templates[name] = template
