@@ -1,4 +1,4 @@
-- host: hoge
-  password: hogehoge
-- host: hoge
-  password: hogehoge
+- host: exsampe-server
+  host_name: localhost
+  password: vagrant
+  log: test.log

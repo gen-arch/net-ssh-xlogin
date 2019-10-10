@@ -1,0 +1,9 @@
+# exsample source file
+#
+# - usage
+# Net::SSH::Xlogin.configure do
+#   source 'xloginrc'
+# end
+
+centos7 'exsample-server',  'ssh://vagrant:vagrant@localhost', port: 2222
+centos7 'exsample-server2', 'ssh://vagrant:vagrant@localhost', port: 2222, log: 'test.log'
