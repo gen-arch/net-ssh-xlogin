@@ -24,7 +24,11 @@ require 'net/ssh/xlogin'
 
 Net::SSH::Xlogin.configure do
   source   "centos7 'exsample-server', 'ssh://vagrant:vagrant@localhost', port: 2222"
-  template(type: :centos7){}
+  template(type: :centos7) do
+    bind(:iplist) do
+      cmd('ifconfig')
+    end
+  end
 end
 
 
