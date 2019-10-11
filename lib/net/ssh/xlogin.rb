@@ -14,6 +14,10 @@ module Net::SSH::Xlogin
       klass.build(name, **opts)
     end
 
+    def list
+      factory.inventory
+    end
+
     def configure(&block)
       instance_eval(&block)
     end
