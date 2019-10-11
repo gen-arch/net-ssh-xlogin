@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    net-ssh-xlogin (0.2.1)
+    net-ssh-xlogin (0.2.4)
       bcrypt_pbkdf
       ed25519
       net-ssh

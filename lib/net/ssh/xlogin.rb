@@ -7,15 +7,24 @@ require 'net/ssh/xlogin/template'
 module Net::SSH::Xlogin
   class Error < StandardError; end
   class << self
-    def get(name, **opts)
-      opts  = factory.inventory[name].merge(opts)
-      type  = opts[:type]
-      klass = factory.templates[type]
-      klass.build(name, **opts)
+    def get(name, **opts, &block)
+      begin
+        opts     = factory.inventory[name].merge(opts)
+        type     = opts[:type]
+        template = factory.templates[type]
+        session  = template.build(name, **opts)
+
+        return session unless block
+        yield  session
+      rescue => err
+        raise Error.new(err)
+      ensure
+        session.close rescue nil
+      end
     end
 
-    def list
-      factory.inventory.map{|k, v| v }
+    def list(**query)
+      factory.query(query)
     end
 
     def configure(&block)

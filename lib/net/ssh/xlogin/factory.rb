@@ -20,6 +20,22 @@ module Net::SSH::Xlogin
       @templates[name] = klass
     end
 
+    def query(q)
+      list = inventory.map{|k, v| v}
+      return list if q.empty?
+
+      list.select do |h|
+        q.any? do |k,v|
+          case v
+          when Regexp
+            h[k] =~ v
+          else
+            h[k] == v
+          end
+        end
+      end
+    end
+
     def yaml(file)
       raise Error, 'not cofnig file' unless File.exist?(file)
       srcs = YAML.load_file(file)
