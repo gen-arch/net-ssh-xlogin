@@ -24,8 +24,9 @@ module Net::SSH::Xlogin
       raise Error, 'not cofnig file' unless File.exist?(file)
       srcs = YAML.load_file(file)
       srcs.each do |src|
-        src  = src.inject({}){|h, (k,v)| h = h.merge(k.sym => v) }
-        name = src.delete(:host)
+        src        = src.inject({}){|h, (k,v)| h = h.merge(k.sym => v) }
+        name       = src.delete(:host)
+        src[:name] = name
         factory.source_set(name, **src)
       end
     end
@@ -42,6 +43,7 @@ module Net::SSH::Xlogin
 
       options[:type]       = method
       options[:uri]        = uri
+      options[:name]       = name
       options[:host_name]  = uri.host
       options[:user]       = uri.user
       options[:password]   = uri.password

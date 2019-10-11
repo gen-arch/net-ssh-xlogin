@@ -15,7 +15,7 @@ module Net::SSH::Xlogin
     end
 
     def list
-      factory.inventory
+      factory.inventory.map{|k, v| v }
     end
 
     def configure(&block)
