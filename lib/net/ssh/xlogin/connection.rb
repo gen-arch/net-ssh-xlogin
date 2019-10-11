@@ -37,7 +37,7 @@ module Net::SSH::Xlogin
         else
           ssh_options       = @options.slice(*Net::SSH::VALID_OPTIONS)
           ssh_options       = @options[:host] unless @options[:host_name]
-          args['Session']   = Net::SSH.start(nil, nil, ssh_options)
+          args['Session']   = Net::SSH.start(name, nil, ssh_options)
         end
 
         super(args)
