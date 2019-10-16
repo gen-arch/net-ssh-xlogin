@@ -1,5 +1,6 @@
 require 'net/ssh'
 require 'net/ssh/telnet'
+require 'net/ssh/gateway'
 require 'net/ssh/xlogin/factory'
 
 module Net::SSH::Xlogin
@@ -27,6 +28,12 @@ module Net::SSH::Xlogin
         args["Terminator"]  = @options[:terminator] || LF
         args["Binmode"]     = @options[:binmode]    || false
         args["PTYOptions"]  = @options[:ptyoptions] || {}
+
+        if @options[:relay]
+          relay             = @options[:relay]
+          info              = Factory.instance.inventory[relay]
+          @options[:port]   = Net::SSH::Gateway.new(relay, nil , info)
+        end
 
         if @options[:proxy]
           args["Host"]      = @options[:host_name]
