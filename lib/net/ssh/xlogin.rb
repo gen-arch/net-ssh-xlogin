@@ -16,10 +16,9 @@ module Net::SSH::Xlogin
 
         return session unless block
         yield  session
+        session.close rescue nil
       rescue => err
         raise Error.new(err)
-      ensure
-        session.close rescue nil
       end
     end
 
